@@ -44,6 +44,8 @@ const Home: React.FC = () => {
   const routeLayerRef = useRef<any>(null);
 
   const [isLogged, setIsLogged] = useState(false);
+  const [username, setUsername] = useState<string | null>(null);
+
   const token = localStorage.getItem("token");
 
   // Inicializar mapa
@@ -57,7 +59,11 @@ const Home: React.FC = () => {
       zoom: 14,
     });
 
-    if (token) setIsLogged(true);
+    if (token) {
+      setIsLogged(true);
+      const storedUser = localStorage.getItem("username"); // 🔹 Guardado al hacer login
+      if (storedUser) setUsername(storedUser);
+    }
 
     const onMapClick = (e: any) => {
       if (!mapRef.current) return;
@@ -80,6 +86,7 @@ const Home: React.FC = () => {
 
     mapRef.current.on("click", onMapClick);
 
+    // 🔹 Al cargar el mapa, traemos reportes iniciales
     fetchReports();
 
     return () => {
@@ -93,9 +100,9 @@ const Home: React.FC = () => {
   // Traer reportes del backend
   const fetchReports = async () => {
     try {
-      const { data } = await axios.get("http://localhost:3000/reports");
+      const { data } = await axios.get("http://localhost:3000/api/reportes");
       data.forEach((report: any) => {
-        placeReportMarker(report.type, report.longitude, report.latitude);
+        placeReportMarker(report.type, report.longitude, report.latitude, report.user?.name);
       });
     } catch (err) {
       console.error("Error cargando reportes:", err);
@@ -103,17 +110,20 @@ const Home: React.FC = () => {
   };
 
   // 🔹 Crear marcador con emoji
-  const placeReportMarker = (type: string, lng: number, lat: number) => {
+  const placeReportMarker = (type: string, lng: number, lat: number, user?: string) => {
     if (!mapRef.current) return;
 
-    // Crear un div personalizado con el emoji
     const el = document.createElement("div");
     el.className = "emoji-marker";
     el.innerText = REPORT_EMOJIS[type] || "📍";
 
     const marker = new tt.Marker({ element: el })
       .setLngLat([lng, lat])
-      .setPopup(new tt.Popup().setHTML(`<b>${type}</b>`))
+      .setPopup(
+        new tt.Popup().setHTML(
+          `<b>Reporte:</b> ${type}<br/>${user ? `<b>Usuario:</b> ${user}` : ""}`
+        )
+      )
       .addTo(mapRef.current);
 
     reportMarkersRef.current.push(marker);
@@ -121,16 +131,34 @@ const Home: React.FC = () => {
 
   // Registrar reporte
   const registerReport = async (type: string, lng: number, lat: number) => {
+    if (!token) {
+      alert("Debes iniciar sesión para registrar un reporte");
+      return;
+    }
+
     try {
-      await axios.post(
-        "http://localhost:3000/reports",
-        { type, latitude: lat, longitude: lng },
-        { headers: { Authorization: `Bearer ${token}` } }
+      const { data } = await axios.post(
+        "http://localhost:3000/api/reportes",
+        {
+          type,
+          latitude: lat,
+          longitude: lng,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // 🔹 Importante
+            "Content-Type": "application/json",
+          },
+        }
       );
-      placeReportMarker(type, lng, lat);
-    } catch (err) {
-      console.error("Error guardando reporte:", err);
-      alert("No se pudo registrar el reporte");
+
+      console.log("Reporte guardado:", data);
+
+      placeReportMarker(type, lng, lat, username || "Anónimo");
+      alert("✅ Reporte registrado con éxito");
+    } catch (err: any) {
+      console.error("Error guardando reporte:", err.response?.data || err);
+      alert("❌ No se pudo registrar el reporte. Verifica el login y token.");
     }
   };
 
@@ -162,12 +190,16 @@ const Home: React.FC = () => {
 
   const allowDrop = (e: React.DragEvent<HTMLDivElement>) => e.preventDefault();
 
-  // Ruta + tráfico
+  // Ruta + tráfico + reportes
   const fetchRuta = async () => {
     if (!originRef.current || !destRef.current) return;
 
+    // 🔹 Limpiar tráfico y reportes anteriores
     trafficMarkersRef.current.forEach((m) => m.remove());
     trafficMarkersRef.current = [];
+
+    reportMarkersRef.current.forEach((m) => m.remove());
+    reportMarkersRef.current = [];
 
     if (routeLayerRef.current) {
       mapRef.current.removeLayer("route");
@@ -176,6 +208,7 @@ const Home: React.FC = () => {
     }
 
     try {
+      // 1️⃣ Ruta desde TomTom
       const routingUrl = `https://api.tomtom.com/routing/1/calculateRoute/${originRef.current[1]},${originRef.current[0]}:${destRef.current[1]},${destRef.current[0]}/json?key=${TOMTOM_KEY}`;
       const routeRes = await axios.get(routingUrl);
 
@@ -209,6 +242,7 @@ const Home: React.FC = () => {
 
       routeLayerRef.current = "route";
 
+      // 2️⃣ Tráfico desde tu backend
       const url = `http://localhost:3000/api/ruta?origen=${originRef.current[0]},${originRef.current[1]}&destino=${destRef.current[0]},${destRef.current[1]}`;
       const { data } = await axios.get(url);
 
@@ -217,7 +251,6 @@ const Home: React.FC = () => {
           const lng = parseFloat(p.lng);
           const lat = parseFloat(p.lat);
 
-          // 🔹 Tráfico sigue con marcador de color
           const marker = new tt.Marker({ color: "orange" })
             .setLngLat([lng, lat])
             .setPopup(
@@ -230,6 +263,14 @@ const Home: React.FC = () => {
           trafficMarkersRef.current.push(marker);
         });
       }
+
+      // 3️⃣ Reportes desde la BD
+      const reportesRes = await axios.get("http://localhost:3000/api/reportes");
+      const reportes = reportesRes.data;
+
+      reportes.forEach((r: any) => {
+        placeReportMarker(r.type, r.longitude, r.latitude, r.user?.name);
+      });
     } catch (err: any) {
       console.error("Error obteniendo ruta:", err);
       alert("Error obteniendo ruta: " + (err?.message || err));
@@ -259,6 +300,13 @@ const Home: React.FC = () => {
   return (
     <div className="home-container">
       <SidebarAuth />
+
+      {/* 🔹 Mostrar usuario logueado */}
+      {isLogged && username && (
+        <div className="user-info">
+          👤 Bienvenido, <b>{username}</b>
+        </div>
+      )}
 
       {/* 🔹 Zona de arrastre con emojis */}
       <div className="report-icons">
