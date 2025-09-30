@@ -53,6 +53,7 @@
 }
 
 .sidebar button {
+  margin: 10px;
   padding: 10px;
   background: #ff4b5c;
   color: white;

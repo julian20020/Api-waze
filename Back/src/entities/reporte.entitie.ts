@@ -2,11 +2,11 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } f
 import { Usuario } from "./User.entieties";
 
 export enum ReportType {
-  RETEN = "reten",
-  CALLE_DANIADA = "calle dañada",
-  TRAFICO_EXTENSO = "trafico extenso",
-  ACCIDENTE = "accidente",
-  OTRO = "otro"
+  RETEN = "Reten",
+  CALLE_DANIADA = "Calle Dañada",
+  TRAFICO_EXTENSO = "Trafico Extenso",
+  ACCIDENTE = "Accidente",
+  OTRO = "Otro"
 }
 
 @Entity("reportes")

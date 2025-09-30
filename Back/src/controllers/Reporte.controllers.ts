@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { createReport } from "../servicies/Reporte.services";
+import { createReport, listReports } from "../servicies/Reporte.services";
 import { ReportType } from "../entities/reporte.entitie";
 
 export const createReportController = async (req: Request, res: Response) => {

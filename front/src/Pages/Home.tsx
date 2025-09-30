@@ -1,4 +1,3 @@
-// src/pages/Home.tsx
 import React, { useEffect, useRef, useState } from "react";
 import tt from "@tomtom-international/web-sdk-maps";
 import "@tomtom-international/web-sdk-maps/dist/maps.css";
@@ -12,11 +11,11 @@ const TOMTOM_KEY = "j61cU0eEQvodLFnjgRRcWvA2pX94KWzA";
 
 // 🔹 Tipos de reportes permitidos
 const REPORT_TYPES: Record<string, string> = {
-  RETEN: "reten",
-  CALLE_DANIADA: "calle dañada",
-  TRAFICO_EXTENSO: "trafico extenso",
-  ACCIDENTE: "accidente",
-  OTRO: "otro",
+  RETEN: "Reten",
+  CALLE_DANIADA: "Calle Dañada",
+  TRAFICO_EXTENSO: "Trafico Extenso",
+  ACCIDENTE: "Accidente",
+  OTRO: "Otro",
 };
 
 // 🔹 Asociar emojis a cada tipo

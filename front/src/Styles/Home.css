@@ -11,8 +11,8 @@
   left: 7dvw;
   border: black 10px solid;
   border-radius: 20px;
-  height: 80%;
-  width: 80%;
+  height: 70%;
+  width: 70%;
 }
 
 /* 🔹 Botones */
@@ -43,7 +43,7 @@
 }
 
 .btn-danger {
-  top: 6dvw;
+  top: 1dvw;
   right: 50dvw;
   background-color: #d32f2f;
 }
@@ -54,6 +54,7 @@
 
 /* 🔹 Instrucciones */
 .instructions {
+  
   position: absolute;
   bottom: 16px;
   right:  16px;
@@ -74,14 +75,15 @@
   flex-direction: column;
   gap: 12px;
   z-index: 2000;
-  background: rgba(20, 20, 20, 0.85);
+  background: #e31e1ee9;
   padding: 10px;
   border-radius: 10px;
 }
 
 .report-icon {
-  font-size: 28px;         /* tamaño grande para los emojis */
+  font-size: 18px;         /* tamaño grande para los emojis */
   padding: 8px;
+  color :#fff;
   text-align: center;
   background: #222;
   border-radius: 10px;
