@@ -17,3 +17,11 @@ export const createReportController = async (req: Request, res: Response) => {
     return res.status(500).json({ message: error.message });
   }
 };
+export const listReportsController = async (req: Request, res: Response) => {
+  try {
+    const reports = await listReports(); 
+    return res.json(reports);
+  } catch (error: any) {
+    return res.status(500).json({ message: error.message });
+  }
+};
