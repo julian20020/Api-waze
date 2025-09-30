@@ -1,0 +1,60 @@
+.sidebar-container {
+  position: relative;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: -350px;
+  width: 350px;
+  height: 100%;
+  background: #111;
+  color: white;
+  transition: left 0.3s ease;
+  padding: 20px;
+  box-shadow: 3px 0 8px rgba(0,0,0,0.5);
+}
+
+.sidebar.open {
+  left: 0;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.sidebar-header button {
+  background: #222;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.sidebar-header button:hover {
+  background: #444;
+}
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-container input {
+  margin-bottom: 10px;
+  padding: 10px;
+}
+
+.form-container button {
+  background: #a4161a;
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.form-container button:disabled {
+  background: gray;
+}
