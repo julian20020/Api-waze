@@ -22,3 +22,9 @@ export const createReport = async (
 
   return await reportRepository.save(report);
 };
+export const listReports = async () => {
+  return await reportRepository.find({
+    relations: ["user"], 
+    order: { createdAt: "DESC" }, 
+  });
+};
